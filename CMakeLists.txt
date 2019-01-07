@@ -3,4 +3,7 @@ project(Andron C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Andron main.c)
+include_directories(header)
+link_directories(header)
+
+add_executable(Andron main.c executable/dictTools.c)
