@@ -2,4 +2,4 @@
  * Тип данных - Словарь
  */
 
-#include "dictionary.h"
+#include "types/dictionary.h"

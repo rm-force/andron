@@ -3,4 +3,4 @@
  */
 
 
-#include "dynamic_array.h"
+#include "types/dynamic_array.h"

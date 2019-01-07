@@ -5,7 +5,17 @@
  * Перечисление допустимых базовых типов
  */
 typedef enum {
-    INT_T,
+    BOOL_T,
     DICT_T,
-    DYN_ARR_T
+    DYN_ARR_T,
+    INT_T
 } AnType;
+
+
+/*
+ * Тип Boolean
+ */
+typedef enum {
+    False,
+    True
+} Bool;

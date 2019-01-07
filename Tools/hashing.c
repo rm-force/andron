@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stddef.h>
 
-#include "hashing.h"
+#include "tools/hashing.h"
 
 
 const double GOLDEN_RATIO = 0.6180339897;
