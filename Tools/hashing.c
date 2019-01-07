@@ -24,10 +24,14 @@ const double GOLDEN_RATIO = 0.6180339897;
 size_t ptrHash(void *key, size_t maxSize) {
     size_t fixedKey = (size_t) key;
 
+    if (fixedKey == 0)
+        return 0;
     // Перемешивание ключа:
     // Сдвиг влево т.к. младшие биты более изменчивы
     // Сдвиг вправо для дополнительного перемешивания (Значительно снижает кол-во коллизий)
-    size_t mixedKey = (fixedKey + (fixedKey << 3u)) >> 3u;
+    size_t mixedKey = (fixedKey + (fixedKey << 2u)) >> 2u;
+    // Разбавление старших битов
+    mixedKey += ~(fixedKey >> 4u);
 
     // Основная формула
     return (size_t)(maxSize * (modfl(GOLDEN_RATIO * mixedKey, NULL)));
