@@ -1,6 +1,6 @@
 #pragma once
 
+#include "tools/bit_operations.h"
 
-extern const double GOLDEN_RATIO;
 
-extern size_t ptrHash(void *key, size_t maxSize);
+extern int hash(void *key, int sizeBytes);
