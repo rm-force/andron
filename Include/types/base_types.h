@@ -8,7 +8,8 @@ typedef enum {
     BOOL_T,
     DICT_T,
     DYN_ARR_T,
-    INT_T
+    INT_T,
+    LINKED_LIST_T
 } AnType;
 
 
