@@ -2,8 +2,9 @@
  * Тип данных - Динамический массив
  */
 
-#include <stdlib.h>
 #include <ctype.h>
+#include <mem.h>
+#include <stdlib.h>
 
 #include "constants.h"
 #include "types/base_types.h"
@@ -46,8 +47,9 @@ Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception) {
      * return: True, если увеличение прошло успешно, иначе - False;
      */
 
+    size_t ptrObjectSize = sizeof(Object*);
     size_t newTotalSize = dynArr->totalSize * DYN_ARR_EXPANSION_RATIO;
-    size_t newSize = newTotalSize * sizeof(Object*);
+    size_t newSize = newTotalSize * ptrObjectSize;
 
     Object **tmp = (Object**)realloc(dynArr->array, newSize);
 
@@ -55,6 +57,10 @@ Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception) {
         MemoryAllocError(exception);
         return False;
     }
+
+    // Заполнение новой части массива нулями, чтобы он не хранил мусор
+    size_t sizeMalloc = newSize - (ptrObjectSize * dynArr->totalSize);
+    memset(tmp + (dynArr->totalSize - 1), 0, sizeMalloc);
 
     dynArr->array = tmp;
     dynArr->totalSize = newTotalSize;
@@ -80,7 +86,8 @@ DynArr* newDynArr(double fullness, size_t *size, Exception *exception) {
      *              если все успешно, иначе - NULL;
      */
 
-    size_t newSize = MIN_DYN_ARR_LENGTH * sizeof(Object*);
+    size_t ptrObjectSize = sizeof(Object*);
+    size_t newSize = MIN_DYN_ARR_LENGTH * ptrObjectSize;
     Object **newArray = (Object**)malloc(newSize);
     DynArr *newDynamicArray = (DynArr*)malloc(sizeof(DynArr));
 
@@ -93,6 +100,10 @@ DynArr* newDynArr(double fullness, size_t *size, Exception *exception) {
 
         return NULL;
     }
+
+    // Предварительное заполение массива нулями, чтобы он не хранил мусор и
+    // в дальнейшем была возможность отличить пустое значение от мусора
+    memset(newArray, 0, MIN_DYN_ARR_LENGTH * ptrObjectSize);
 
     if (fullness == 0) fullness = DYN_ARR_LIMIT;
 
