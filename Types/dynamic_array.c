@@ -23,9 +23,9 @@ Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount) {
      * return: True, если массив будет переполнен, иначе - False;
      */
 
-    double fullness = (double)(dynArr->length + newItemsCount) / dynArr->totalSize;
+    double currentFullness = (double)(dynArr->length + newItemsCount) / dynArr->totalSize;
 
-    if (fullness >= DYN_ARR_LIMIT) {
+    if (currentFullness >= dynArr->fullness) {
         return True;
     }
 
@@ -64,10 +64,13 @@ Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception) {
 };
 
 
-DynArr* newDynArr(size_t *size, Exception *exception) {
+DynArr* newDynArr(double fullness, size_t *size, Exception *exception) {
     /*
      * Функция выполняющая создание нового динамического массива.
      *
+     * fullness:    Коэффициент допустимой заполненности массива, превысив которую
+     *              массив необходимо расширять (Значение по умолчанию будет присвоено,
+     *              если передать 0 (ноль));
      * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
      *              если массив не удастся создать переменная не изменится;
      * exception:   Указатель на структуру исключения, в которую будет записана информация,
@@ -91,9 +94,12 @@ DynArr* newDynArr(size_t *size, Exception *exception) {
         return NULL;
     }
 
+    if (fullness == 0) fullness = DYN_ARR_LIMIT;
+
     newDynamicArray->array = newArray;
     newDynamicArray->length = 0;
     newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
+    newDynamicArray->fullness = fullness;
     *size = newSize;
 
     return newDynamicArray;
@@ -106,7 +112,7 @@ Bool addToDynArr(DynArr *dynArr, Object *newValue, size_t *size, Exception *exce
      *
      * array:       Динамический массив, в который необходимо добавить значени;
      * newValue:    Указатель на новое значение;
-     * size:        Указатель на переменную, в которую будет записан новый размер массива
+     * size:        Указатель на переменную, в которую будет записан новый размер массива (в байтах)
      *              при его рассширении, если расширения не было переменная не изменится;
      * exception:   Указатель на структуру исключения, в которую будет записана информация,
      *              если оно возникнет;
