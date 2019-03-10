@@ -5,3 +5,7 @@ extern const int DYN_ARR_EXPANSION_RATIO = 2;
 // Коэффициент предельного заполнения динамического массива
 // Это отношение занятых ячеек к суммарному количеству ячеек
 extern const double DYN_ARR_LIMIT = 2.0 / 3.0;
+
+
+// Размер динамического массива по умолчанию (В ячейках)
+extern const int MIN_DYN_ARR_LENGTH = 8;

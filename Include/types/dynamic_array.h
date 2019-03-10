@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 
+#include "types/exceptions.h"
 #include "object.h"
 
 
@@ -14,14 +15,10 @@
 typedef struct {
     Object **array;
     size_t length;
-    size_t _totalSize;
+    size_t totalSize;
 } DynArr;
 
-
-/*
- * Функция выполняющая добавление нового значения в динамический массив
- *
- * array:       Динамический массив, в который необходимо добавить значени;
- * newValue:    Указатель на новое значение;
- */
-Bool addToDynArr(DynArr *array, Object *newValue);
+Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount);
+Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception);
+DynArr* newDynArr(size_t *size, Exception *exception);
+Bool addToDynArr(DynArr *array, Object *newValue, size_t *size, Exception *exception);

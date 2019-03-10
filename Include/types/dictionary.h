@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ctype.h"
+#include <ctype.h>
 
 #include "dynamic_array.h"
 
