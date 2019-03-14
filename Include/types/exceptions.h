@@ -3,6 +3,11 @@
 #include "types/base_types.h"
 
 
+const char *MSG_IDX_OUT = "Index outside";
+const char *MSG_MALLOC = "Could not allocate memory";
+const char *MSG_ZERO_DIV = "Error dividing by zero";
+
+
 /*
  * Типы исключений
  */
@@ -24,13 +29,13 @@ typedef enum {
  */
 typedef struct {
     Bool isOccurred;
-    char *details;
+    const char *details;
     ExceptionType type;
 } Exception;
 
 
 Exception* newException();
-void setToException(Exception *exception, char *details, ExceptionType type);
+void setToException(Exception *exception, const char *details, ExceptionType type);
 void MemoryAllocError(Exception *exception);
 void ZeroDivisionError(Exception *exception);
 void IndexError(Exception *exception);

@@ -29,7 +29,7 @@ Exception* newException() {
 };
 
 
-void setToException(Exception *exception, char *details, ExceptionType type) {
+void setToException(Exception *exception, const char *details, ExceptionType type) {
     /*
      * Функция для установки атрибутов "исключения"
      *
@@ -57,7 +57,7 @@ void setToException(Exception *exception, char *details, ExceptionType type) {
 void MemoryAllocError(Exception *exception) {
     setToException(
             exception,
-            "Ошибка выделения памяти. Не удалось выделить память.",
+            MSG_MALLOC,
             MEMORY_ALLOC_ERROR
     );
 };
@@ -66,7 +66,7 @@ void MemoryAllocError(Exception *exception) {
 void ZeroDivisionError(Exception *exception) {
     setToException(
             exception,
-            "Ошибка деления на ноль.",
+            MSG_ZERO_DIV,
             ZERO_DIVISION_ERROR
     );
 }
@@ -75,7 +75,7 @@ void ZeroDivisionError(Exception *exception) {
 void IndexError(Exception *exception) {
     setToException(
             exception,
-            "Индекс за пределами массива.",
+            MSG_IDX_OUT,
             INDEX_ERROR
     );
 }

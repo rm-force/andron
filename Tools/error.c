@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 
-void error(char *source, char *reason) {
+void error(char *source, const char *reason) {
     /*
      * Функция для прерывания выполнения программы с выводом
      * сообщения, в котором говорится где и какая произошла ошибка
@@ -16,6 +16,6 @@ void error(char *source, char *reason) {
      * reason:  Причина, по которой произошла ошибка
      */
 
-    fprintf(stderr, "In %s happened %s", source, reason);
+    fprintf(stderr, "%s in %s", reason, source);
     exit(EXIT_FAILURE);
 }
