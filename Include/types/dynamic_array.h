@@ -16,12 +16,16 @@
  */
 typedef struct {
     Object **array;
-    size_t length;
-    size_t totalSize;
+    unsigned long length;
+    unsigned long totalSize;
     double fullness;
 } DynArr;
 
-Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount);
-Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception);
-DynArr* newDynArr(double fullness, size_t *size, Exception *exception);
-Bool addToDynArr(DynArr *dynArr, Object *newValue, size_t *size, Exception *exception);
+Bool dynArrWillFull(DynArr *dynArr, unsigned long newItemsCount);
+void dynArrIncrease(DynArr *dynArr, size_t *size);
+DynArr* newDynArr(double fullness, size_t *size);
+void addToDynArr(DynArr *dynArr, Object *newValue, size_t *size);
+void changeItemDynArr(DynArr *dynArr, long index, Object *newValue);
+void dynArrInsert(DynArr *dynArr, long index, Object *newValue, size_t *size);
+Object* getItemDynArr(DynArr *dynArr, long index);
+void delDynArr(DynArr *dynArr);

@@ -7,13 +7,54 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "tools/error.h"
+#include "tools/math.h"
 #include "types/base_types.h"
 #include "types/dynamic_array.h"
-#include "types/exceptions.h"
 #include "types/object.h"
 
 
-Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount) {
+Bool _validateDynArr(DynArr *dynArr) {
+    /*
+     * Функция для проверки динамического массива
+     *
+     * dynArr: Динамический массив, который нужно проверить;
+     *
+     * return: True, если массив прошел проверку, иначе - False
+     */
+
+    if (dynArr == NULL)
+        return False;
+
+    return True;
+}
+
+
+unsigned long _validateIndex(DynArr *dynArr, long index) {
+    /*
+     * Функция осуществляющая проверку индекса для данного массива
+     *
+     * dynArr:  Указатель на массив, для которого осуществляется проверка;
+     * index:   Индекс для проверки;
+     *
+     * return: Обработанный индекс
+     */
+
+    Bool isMinus = (Bool)(sign_li(index) < 0);
+
+    index = labs(index);
+
+    if (index > dynArr->length || (!isMinus && index == dynArr->length)) {
+        error("_validateIndex", IDX_ERR);
+    }
+
+    if (isMinus) index = dynArr->length - index;
+
+    return (unsigned long)index;
+}
+
+
+Bool dynArrWillFull(DynArr *dynArr, unsigned long newItemsCount) {
     /*
      * Функция осуществляющая проверку будет ли массив переполнен,
      * если в него добавится указанное кол-во элементов
@@ -24,6 +65,12 @@ Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount) {
      * return: True, если массив будет переполнен, иначе - False;
      */
 
+    if (!_validateDynArr(dynArr)) return False;
+
+    if (dynArr->totalSize == 0) {
+        error("dynArrWillFull", ZERO_DIV_ERR);
+    }
+
     double currentFullness = (double)(dynArr->length + newItemsCount) / dynArr->totalSize;
 
     if (currentFullness >= dynArr->fullness) {
@@ -31,46 +78,40 @@ Bool dynArrWillFull(DynArr *dynArr, size_t newItemsCount) {
     }
 
     return False;
-};
+}
 
 
-Bool dynArrIncrease(DynArr *dynArr, size_t *size, Exception *exception) {
+void dynArrIncrease(DynArr *dynArr, size_t *size) {
     /*
      * Функция увеличивающая размер динамического массива
      *
      * dynArr:      Указатель на массив, который необходимо увеличить;
      * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
      *              если массив не удастся создать переменная не изменится;
-     * exception:   Указатель на структуру исключения, в которую будет записана информация,
-     *              если оно возникнет;
-     *
-     * return: True, если увеличение прошло успешно, иначе - False;
      */
 
-    size_t ptrObjectSize = sizeof(Object*);
+    if (!_validateDynArr(dynArr)) return;
+
     size_t newTotalSize = dynArr->totalSize * DYN_ARR_EXPANSION_RATIO;
-    size_t newSize = newTotalSize * ptrObjectSize;
+    size_t newSize = newTotalSize * PTR_OBJECT_SIZE;
 
     Object **tmp = (Object**)realloc(dynArr->array, newSize);
 
     if (tmp == NULL) {
-        MemoryAllocError(exception);
-        return False;
+        error("dynArrIncrease", MALLOC_ERR);
     }
 
     // Заполнение новой части массива нулями, чтобы он не хранил мусор
-    size_t sizeMalloc = newSize - (ptrObjectSize * dynArr->totalSize);
+    size_t sizeMalloc = newSize - (PTR_OBJECT_SIZE * dynArr->totalSize);
     memset(tmp + (dynArr->totalSize - 1), 0, sizeMalloc);
 
     dynArr->array = tmp;
-    dynArr->totalSize = newTotalSize;
+    dynArr->totalSize = (unsigned long)newTotalSize;
     *size = newSize;
-
-    return True;
-};
+}
 
 
-DynArr* newDynArr(double fullness, size_t *size, Exception *exception) {
+DynArr* newDynArr(double fullness, size_t *size) {
     /*
      * Функция выполняющая создание нового динамического массива.
      *
@@ -79,66 +120,143 @@ DynArr* newDynArr(double fullness, size_t *size, Exception *exception) {
      *              если передать 0 (ноль));
      * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
      *              если массив не удастся создать переменная не изменится;
-     * exception:   Указатель на структуру исключения, в которую будет записана информация,
-     *              если оно возникнет;
      *
-     * return:      Указатель на струкуру динамического массива,
-     *              если все успешно, иначе - NULL;
+     * return:      Указатель на струкуру динамического массива;
      */
 
-    size_t ptrObjectSize = sizeof(Object*);
-    size_t newSize = MIN_DYN_ARR_LENGTH * ptrObjectSize;
+    size_t newSize = MIN_DYN_ARR_LENGTH * PTR_OBJECT_SIZE;
     Object **newArray = (Object**)malloc(newSize);
     DynArr *newDynamicArray = (DynArr*)malloc(sizeof(DynArr));
 
     if (newArray == NULL || newDynamicArray == NULL) {
         // Если не удалось выделить память хотя бы на одну структуру
-        // все очищается и возвращается NULL
+        // все очищается и вызывается ошибка
         free(newArray);
         free(newDynamicArray);
-        MemoryAllocError(exception);
 
-        return NULL;
+        error("newDynArr", MALLOC_ERR);
+    } else {
+
+        // Предварительное заполение массива нулями, чтобы он не хранил мусор и
+        // в дальнейшем была возможность отличить пустое значение от мусора
+        memset(newArray, 0, MIN_DYN_ARR_LENGTH * PTR_OBJECT_SIZE);
+
+        if (fullness == 0) fullness = DYN_ARR_LIMIT;
+
+        newDynamicArray->array = newArray;
+        newDynamicArray->length = 0;
+        newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
+        newDynamicArray->fullness = fullness;
+        *size = newSize;
+
+        return newDynamicArray;
     }
-
-    // Предварительное заполение массива нулями, чтобы он не хранил мусор и
-    // в дальнейшем была возможность отличить пустое значение от мусора
-    memset(newArray, 0, MIN_DYN_ARR_LENGTH * ptrObjectSize);
-
-    if (fullness == 0) fullness = DYN_ARR_LIMIT;
-
-    newDynamicArray->array = newArray;
-    newDynamicArray->length = 0;
-    newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
-    newDynamicArray->fullness = fullness;
-    *size = newSize;
-
-    return newDynamicArray;
-};
+}
 
 
-Bool addToDynArr(DynArr *dynArr, Object *newValue, size_t *size, Exception *exception) {
+void addToDynArr(DynArr *dynArr, Object *newValue, size_t *size) {
     /*
      * Функция выполняющая добавление нового значения в динамический массив
      *
-     * array:       Динамический массив, в который необходимо добавить значени;
+     * dynArr:      Динамический массив, в который необходимо добавить значени;
      * newValue:    Указатель на новое значение;
      * size:        Указатель на переменную, в которую будет записан новый размер массива (в байтах)
      *              при его рассширении, если расширения не было переменная не изменится;
-     * exception:   Указатель на структуру исключения, в которую будет записана информация,
-     *              если оно возникнет;
-     *
-     * return:      return: True, если все успешно, иначе - False;
      */
 
+    if (!_validateDynArr(dynArr)) return;
+
     if (dynArrWillFull(dynArr, 1)) {
-        if (!dynArrIncrease(dynArr, size, exception)) {
-            return False;
-        }
+        dynArrIncrease(dynArr, size);
     }
 
-    dynArr->array[dynArr->length - 1] = newValue;
+    dynArr->array[dynArr->length] = newValue;
     dynArr->length += 1;
+    addObjectLink(newValue);
+}
 
-    return True;
-};
+
+void changeItemDynArr(DynArr *dynArr, long index, Object *newValue) {
+    /*
+     * Функция осуществляющая замену значения находящегося по индексу "index"
+     * на новое значение newValue.
+     * Функция не проверяет то, что индекс выходит за пределы массива
+     * Данную проверку необходимо сделать до вызова функции
+     *
+     * dynArr:      Динамический массив, в который необходимо добавить значение;
+     * index:       Индекс, по которому необходимо заменить значение;
+     * newValue:    Указатель на новое значение;
+     */
+
+    if (!_validateDynArr(dynArr)) return;
+
+    dynArr->array[_validateIndex(dynArr, index)] = newValue;
+    addObjectLink(newValue);
+}
+
+
+void dynArrInsert(DynArr *dynArr, long index, Object *newValue, size_t *size) {
+    /*
+     * Функция выполняющая вставку нового значения в произвольное место массива
+     * Вставляемое значение сдвигает вправо остальные значения
+     *
+     * dynArr:      Динамический массив, в который необходимо вставить значение;
+     * index:       Индекс, по которому необходимо выполнить вставку;
+     * newValue:    Указатель на новое значение;
+     * size:        Указатель на переменную, в которую будет записан новый размер массива (в байтах)
+     *              при его рассширении, если расширения не было переменная не изменится;
+     */
+
+    if (!_validateDynArr(dynArr)) return;
+
+    unsigned long idx = _validateIndex(dynArr, index);
+
+    if (dynArrWillFull(dynArr, 1)) {
+        dynArrIncrease(dynArr, size);
+    }
+
+    // Сдвиг элементов массива вправо начиная с того, на место которого надо вставить
+    for (unsigned long i = dynArr->length-1; i >= idx ; i--) {
+        dynArr->array[i+1] = dynArr->array[i];
+    }
+
+    dynArr->array[idx] = newValue;
+    addObjectLink(newValue);
+}
+
+
+Object* getItemDynArr(DynArr *dynArr, long index) {
+    /*
+     * Функция для получения эдемента массива по индексу
+     *
+     * dynArr:  Указатель на массив, из которого надо получить элемент;
+     * index:   Индекс позиции, из которой надо получить элемент;
+     *
+     * return:  Указатель на объект, находящийся по указанному индексу
+     *          или NULL, если массив пустой;
+     */
+
+    if (!_validateDynArr(dynArr)) return NULL;
+
+    unsigned long idx = _validateIndex(dynArr, index);
+
+    return dynArr->array[idx];
+}
+
+
+void delDynArr(DynArr *dynArr) {
+    /*
+     * Функция для удаления массива
+     *
+     * dynArr:  Указатель на массив, который надо удалить;
+     */
+
+    if (!_validateDynArr(dynArr)) return;
+
+    while (--dynArr->length > -1) {
+        deleteObject(dynArr->array[dynArr->length]);
+    }
+
+    free(dynArr->array);
+    free(dynArr);
+}
