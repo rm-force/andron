@@ -14,6 +14,20 @@
 #include "types/object.h"
 
 
+void _setSize(size_t *size, size_t newSize) {
+    /*
+     * Функция осуществляющая безопасное присвоение размера;
+     *
+     * size:    Указатель, в значение которого надо записать новое значение;
+     * newSize: Новое значение, которое необходимо записать;
+     */
+
+    if (size == NULL) return;
+
+    *size = newSize;
+}
+
+
 Bool _validateDynArr(DynArr *dynArr) {
     /*
      * Функция для проверки динамического массива
@@ -107,7 +121,7 @@ void dynArrIncrease(DynArr *dynArr, size_t *size) {
 
     dynArr->array = tmp;
     dynArr->totalSize = (unsigned long)newTotalSize;
-    *size = newSize;
+    _setSize(size, newSize);
 }
 
 
@@ -147,7 +161,7 @@ DynArr* newDynArr(double fullness, size_t *size) {
         newDynamicArray->length = 0;
         newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
         newDynamicArray->fullness = fullness;
-        *size = newSize;
+        _setSize(size, newSize);
 
         return newDynamicArray;
     }
@@ -190,7 +204,10 @@ void changeItemDynArr(DynArr *dynArr, long index, Object *newValue) {
 
     if (!_validateDynArr(dynArr)) return;
 
-    dynArr->array[_validateIndex(dynArr, index)] = newValue;
+    unsigned long idx = _validateIndex(dynArr, index);
+
+    deleteObject(dynArr->array[idx]);
+    dynArr->array[idx] = newValue;
     addObjectLink(newValue);
 }
 
