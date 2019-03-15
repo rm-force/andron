@@ -81,13 +81,7 @@ Bool dynArrWillFull(DynArr *dynArr, unsigned long newItemsCount) {
 
     if (!_validateDynArr(dynArr)) return False;
 
-    if (dynArr->totalSize == 0) {
-        error("dynArrWillFull", ZERO_DIV_ERR);
-    }
-
-    double currentFullness = (double)(dynArr->length + newItemsCount) / dynArr->totalSize;
-
-    if (currentFullness >= dynArr->fullness) {
+    if (dynArr->length + newItemsCount > dynArr->totalSize) {
         return True;
     }
 
@@ -125,13 +119,10 @@ void dynArrIncrease(DynArr *dynArr, size_t *size) {
 }
 
 
-DynArr* newDynArr(double fullness, size_t *size) {
+DynArr* newDynArr(size_t *size) {
     /*
      * Функция выполняющая создание нового динамического массива.
      *
-     * fullness:    Коэффициент допустимой заполненности массива, превысив которую
-     *              массив необходимо расширять (Значение по умолчанию будет присвоено,
-     *              если передать 0 (ноль));
      * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
      *              если массив не удастся создать переменная не изменится;
      *
@@ -155,12 +146,9 @@ DynArr* newDynArr(double fullness, size_t *size) {
         // в дальнейшем была возможность отличить пустое значение от мусора
         memset(newArray, 0, MIN_DYN_ARR_LENGTH * PTR_OBJECT_SIZE);
 
-        if (fullness == 0) fullness = DYN_ARR_LIMIT;
-
         newDynamicArray->array = newArray;
         newDynamicArray->length = 0;
         newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
-        newDynamicArray->fullness = fullness;
         _setSize(size, newSize);
 
         return newDynamicArray;
