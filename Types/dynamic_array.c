@@ -30,7 +30,7 @@ Bool _validateDynArr(DynArr *dynArr) {
 }
 
 
-unsigned long _validateIndex(DynArr *dynArr, long index) {
+unsigned long _validateIndexDynArr(DynArr *dynArr, long index) {
     /*
      * Функция осуществляющая проверку индекса для данного массива
      *
@@ -42,15 +42,15 @@ unsigned long _validateIndex(DynArr *dynArr, long index) {
 
     Bool isMinus = (Bool)(sign_li(index) < 0);
 
-    index = labs(index);
+    unsigned long idx = (unsigned long)labs(index);
 
-    if (index > dynArr->length || (!isMinus && index == dynArr->length)) {
-        error("_validateIndex", IDX_ERR);
+    if (idx > dynArr->length || (!isMinus && idx == dynArr->length)) {
+        error("_validateIndexDynArr", IDX_ERR);
     }
 
-    if (isMinus) index = dynArr->length - index;
+    if (isMinus) idx = dynArr->length - idx;
 
-    return (unsigned long)index;
+    return idx;
 }
 
 
@@ -171,7 +171,7 @@ void changeItemDynArr(DynArr *dynArr, long index, Object *newValue) {
 
     if (!_validateDynArr(dynArr)) return;
 
-    unsigned long idx = _validateIndex(dynArr, index);
+    unsigned long idx = _validateIndexDynArr(dynArr, index);
 
     deleteObject(dynArr->array[idx]);
     dynArr->array[idx] = newValue;
@@ -191,7 +191,7 @@ void dynArrInsert(DynArr *dynArr, long index, Object *newValue) {
 
     if (!_validateDynArr(dynArr)) return;
 
-    unsigned long idx = _validateIndex(dynArr, index);
+    unsigned long idx = _validateIndexDynArr(dynArr, index);
 
     if (dynArrWillFull(dynArr, 1)) {
         dynArrIncrease(dynArr);
@@ -220,7 +220,7 @@ Object* getItemDynArr(DynArr *dynArr, long index) {
 
     if (!_validateDynArr(dynArr)) return NULL;
 
-    unsigned long idx = _validateIndex(dynArr, index);
+    unsigned long idx = _validateIndexDynArr(dynArr, index);
 
     return dynArr->array[idx];
 }
