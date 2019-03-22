@@ -11,32 +11,27 @@
  * prev:    Указатель на предыдущую ячейку;
  * next:    Указатель на следующую ячейку;
  */
-typedef struct linkedNode_t {
+typedef struct LinkedNode_t {
     Object *value;
-    struct linkedNode_t *prev;
-    struct linkedNode_t *next;
+    struct LinkedNode_t *prev;
+    struct LinkedNode_t *next;
 } LinkedNode;
-
 
 /*
  * Структура связного списка
  * first:   Указатель на первую ячейку;
  * last:    Указатель на последнюю ячейку;
- * length:  Количество элементов в списке;
+ * length:  Количество элементов в списке (в ячейках);
+ * _size:   Размер списка (в байтах);
  */
 typedef struct {
     LinkedNode *first;
     LinkedNode *last;
-    size_t length;
+    unsigned long length;
+    size_t _size;
 } LinkedList;
 
-
-/*
- * Функция выполняющая добавлени нового значения в связный список
- *
- * linkedList:  Указатель на список, в который необходимо добавить значение;
- * newValue:    Указатель на новое значение;
- *
- * return: True, если все успешно, иначе - False;
- */
-Bool addToLinkedList(LinkedList *linkedList, Object *newValue);
+LinkedList* newLinkedList();
+void addToLinkedList(LinkedList *linkedList, Object *newValue);
+Object* getItemLinkedList(LinkedList *linkedList, long index);
+void delItemLinkedList(LinkedList *linkedList, long index);

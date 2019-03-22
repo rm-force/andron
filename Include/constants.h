@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 
+#include "types/linked_list.h"
 #include "types/object.h"
 
 // Коэффициент расширения динамического массива
@@ -14,3 +15,6 @@ const int MIN_DYN_ARR_LENGTH = 8;
 // Размер указателя на Object. Высчитывается заранее, т.к. много где
 // используется
 const size_t PTR_OBJECT_SIZE = sizeof(Object*);
+
+// Размер узла связного списка
+const size_t LINKED_NODE_SIZE = sizeof(LinkedNode);
