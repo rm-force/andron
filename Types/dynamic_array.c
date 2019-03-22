@@ -14,20 +14,6 @@
 #include "types/object.h"
 
 
-void _setSize(size_t *size, size_t newSize) {
-    /*
-     * Функция осуществляющая безопасное присвоение размера;
-     *
-     * size:    Указатель, в значение которого надо записать новое значение;
-     * newSize: Новое значение, которое необходимо записать;
-     */
-
-    if (size == NULL) return;
-
-    *size = newSize;
-}
-
-
 Bool _validateDynArr(DynArr *dynArr) {
     /*
      * Функция для проверки динамического массива
@@ -89,13 +75,11 @@ Bool dynArrWillFull(DynArr *dynArr, unsigned long newItemsCount) {
 }
 
 
-void dynArrIncrease(DynArr *dynArr, size_t *size) {
+void dynArrIncrease(DynArr *dynArr) {
     /*
      * Функция увеличивающая размер динамического массива
      *
-     * dynArr:      Указатель на массив, который необходимо увеличить;
-     * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
-     *              если массив не удастся создать переменная не изменится;
+     * dynArr:      Указатель на массив, который необходимо увеличить;,
      */
 
     if (!_validateDynArr(dynArr)) return;
@@ -115,18 +99,15 @@ void dynArrIncrease(DynArr *dynArr, size_t *size) {
 
     dynArr->array = tmp;
     dynArr->totalSize = (unsigned long)newTotalSize;
-    _setSize(size, newSize);
+    dynArr->_size = newSize;
 }
 
 
-DynArr* newDynArr(size_t *size) {
+DynArr* newDynArr() {
     /*
      * Функция выполняющая создание нового динамического массива.
      *
-     * size:        Указатель на переменную, в которую будет записан размер массива (в байтах),
-     *              если массив не удастся создать переменная не изменится;
-     *
-     * return:      Указатель на струкуру динамического массива;
+     * return:  Указатель на струкуру динамического массива;
      */
 
     size_t newSize = MIN_DYN_ARR_LENGTH * PTR_OBJECT_SIZE;
@@ -149,27 +130,25 @@ DynArr* newDynArr(size_t *size) {
         newDynamicArray->array = newArray;
         newDynamicArray->length = 0;
         newDynamicArray->totalSize = MIN_DYN_ARR_LENGTH;
-        _setSize(size, newSize);
+        newDynamicArray->_size = newSize;
 
         return newDynamicArray;
     }
 }
 
 
-void addToDynArr(DynArr *dynArr, Object *newValue, size_t *size) {
+void addToDynArr(DynArr *dynArr, Object *newValue) {
     /*
      * Функция выполняющая добавление нового значения в динамический массив
      *
      * dynArr:      Динамический массив, в который необходимо добавить значени;
      * newValue:    Указатель на новое значение;
-     * size:        Указатель на переменную, в которую будет записан новый размер массива (в байтах)
-     *              при его рассширении, если расширения не было переменная не изменится;
      */
 
     if (!_validateDynArr(dynArr)) return;
 
     if (dynArrWillFull(dynArr, 1)) {
-        dynArrIncrease(dynArr, size);
+        dynArrIncrease(dynArr);
     }
 
     dynArr->array[dynArr->length] = newValue;
@@ -200,7 +179,7 @@ void changeItemDynArr(DynArr *dynArr, long index, Object *newValue) {
 }
 
 
-void dynArrInsert(DynArr *dynArr, long index, Object *newValue, size_t *size) {
+void dynArrInsert(DynArr *dynArr, long index, Object *newValue) {
     /*
      * Функция выполняющая вставку нового значения в произвольное место массива
      * Вставляемое значение сдвигает вправо остальные значения
@@ -208,8 +187,6 @@ void dynArrInsert(DynArr *dynArr, long index, Object *newValue, size_t *size) {
      * dynArr:      Динамический массив, в который необходимо вставить значение;
      * index:       Индекс, по которому необходимо выполнить вставку;
      * newValue:    Указатель на новое значение;
-     * size:        Указатель на переменную, в которую будет записан новый размер массива (в байтах)
-     *              при его рассширении, если расширения не было переменная не изменится;
      */
 
     if (!_validateDynArr(dynArr)) return;
@@ -217,7 +194,7 @@ void dynArrInsert(DynArr *dynArr, long index, Object *newValue, size_t *size) {
     unsigned long idx = _validateIndex(dynArr, index);
 
     if (dynArrWillFull(dynArr, 1)) {
-        dynArrIncrease(dynArr, size);
+        dynArrIncrease(dynArr);
     }
 
     // Сдвиг элементов массива вправо начиная с того, на место которого надо вставить
