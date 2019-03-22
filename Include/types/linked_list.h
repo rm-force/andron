@@ -35,3 +35,5 @@ LinkedList* newLinkedList();
 void addToLinkedList(LinkedList *linkedList, Object *newValue);
 Object* getItemLinkedList(LinkedList *linkedList, long index);
 void delItemLinkedList(LinkedList *linkedList, long index);
+void linkedListInsert(LinkedList *linkedList, long index, Object *newValue);
+void delLinkedList(LinkedList *linkedList);

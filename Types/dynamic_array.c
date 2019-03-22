@@ -241,4 +241,5 @@ void delDynArr(DynArr *dynArr) {
 
     free(dynArr->array);
     free(dynArr);
+    dynArr = NULL;
 }

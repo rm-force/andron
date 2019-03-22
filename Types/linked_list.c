@@ -125,6 +125,27 @@ LinkedNode* _getNodeLinkedList(LinkedList *linkedList, long index) {
 }
 
 
+LinkedNode* newLinkedNode() {
+    /*
+     * Функция выполняющая создание нового узла связного списка
+     *
+     * return:  Указатель на структуру узла связного списка;
+     */
+
+    LinkedNode* newNode = (LinkedNode*)malloc(LINKED_NODE_SIZE);
+
+    if (newNode == NULL) {
+        error("newLinkedNode", MALLOC_ERR);
+    } else {
+        newNode->next = NULL;
+        newNode->prev = NULL;
+        newNode->value = NULL;
+
+        return newNode;
+    }
+}
+
+
 LinkedList* newLinkedList() {
     /*
      * Функция выполняющая создание нового связного списка
@@ -231,4 +252,58 @@ void delItemLinkedList(LinkedList *linkedList, long index) {
 
     linkedList->length -= 1;
     linkedList->_size -= LINKED_NODE_SIZE;
+}
+
+
+void linkedListInsert(LinkedList *linkedList, long index, Object *newValue) {
+    /*
+     * Функция для вставки элемента в связный список перед указанным индексом
+     *
+     * linkedList:  Указатель на список, в который необходимо вставить элемент;
+     * index:       Индекс, перед которым необходимо вставить элемент;
+     * newValue:    Указатель на объект, который будет вставлен;
+     */
+
+    if (!_validateLinkedList(linkedList)) return;
+
+    LinkedNode *currentNode = _getNodeLinkedList(linkedList, index);
+    LinkedNode *newNode = newLinkedNode();
+
+    newNode->prev = currentNode->prev;
+    newNode->next = currentNode;
+    newNode->value = newValue;
+    addObjectLink(newValue);
+
+    if (currentNode->prev->next != NULL) {
+        currentNode->prev->next = newNode;
+    }
+
+    currentNode->prev = newNode;
+
+    linkedList->length += 1;
+    linkedList->_size += LINKED_NODE_SIZE;
+}
+
+
+void delLinkedList(LinkedList *linkedList) {
+    /*
+    * Функция для удаления связного списка
+    *
+    * linkedList:  Указатель на список, который надо удалить;
+    */
+
+    if (!_validateLinkedList(linkedList)) return;
+
+    LinkedNode *currentNode = linkedList->last;
+
+    while (linkedList->length--) {
+        deleteObject(currentNode->value);
+
+        linkedList->last = currentNode->prev;
+        free(currentNode);
+        currentNode = linkedList->last;
+    }
+
+    free(linkedList);
+    linkedList = NULL;
 }
